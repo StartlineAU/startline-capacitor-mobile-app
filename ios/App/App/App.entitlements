@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Universal links: startlineau.com links open the app. Verified against
+	     /.well-known/apple-app-site-association served by the web app. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:startlineau.com</string>
+		<string>applinks:organiser.startlineau.com</string>
+		<string>applinks:staging.startlineau.com</string>
+	</array>
+</dict>
+</plist>

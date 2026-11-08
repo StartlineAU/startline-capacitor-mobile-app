@@ -1,0 +1,2 @@
+app_identifier("com.startlineau.app")
+team_id(ENV["APPLE_TEAM_ID"])

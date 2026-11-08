@@ -1,0 +1,39 @@
+# iOS release lane, run by .github/workflows/ios.yml on a macOS runner.
+#
+# Signing uses an App Store Connect API key with Xcode's automatic signing
+# (-allowProvisioningUpdates), so there is no certificates repo to maintain.
+# Every secret comes from the environment; see README -> Releases.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build a signed release and upload it to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_P8"),
+      in_house: false,
+    )
+
+    increment_build_number(
+      xcodeproj: "ios/App/App.xcodeproj",
+      build_number: ENV.fetch("BUILD_NUMBER"),
+    )
+
+    build_app(
+      project: "ios/App/App.xcodeproj",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID')} CODE_SIGN_STYLE=Automatic",
+      export_xcargs: "-allowProvisioningUpdates",
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end
