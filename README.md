@@ -18,7 +18,7 @@ needed for native changes (icons, permissions, plugins, the config in this repo)
 | Command | Loads | Use |
 |---|---|---|
 | `pnpm sync:dev` | your local web dev server (`http://10.0.2.2:3000` from the Android emulator) | development |
-| `pnpm sync:staging` | https://staging.startlineau.com | internal testing |
+| `pnpm sync:staging` | `$CAP_STAGING_URL` (the Amplify branch URL) | internal testing |
 | `pnpm sync:prod` | https://startlineau.com | store builds |
 
 The value is copied into the native projects, so run a `sync` after switching.
@@ -28,6 +28,18 @@ For a real phone in dev, point it at your machine's LAN address:
 
 Production is in waitlist mode until launch, so use staging for testing.
 
+Staging is the Amplify branch domain for `main`, not a `staging.` subdomain:
+that name was never delegated and does not resolve. The host carries the
+Amplify app ID, and this repo is public, so it is not committed. Set it for a
+staging sync:
+
+```bash
+CAP_STAGING_URL=https://<branch>.<app-id>.amplifyapp.com pnpm sync:staging
+```
+
+CI reads the `CAP_STAGING_URL` repository variable, so releases keep working.
+Ask a maintainer for the value.
+
 ## Setup
 
 - Node 22+ and pnpm 11 (`corepack enable`)
@@ -36,7 +48,7 @@ Production is in waitlist mode until launch, so use staging for testing.
 
 ```bash
 pnpm install
-pnpm sync:staging
+CAP_STAGING_URL=https://<branch>.<app-id>.amplifyapp.com pnpm sync:staging
 pnpm open:android        # or: pnpm run:android to pick an emulator or device
 pnpm open:ios            # Mac only
 ```

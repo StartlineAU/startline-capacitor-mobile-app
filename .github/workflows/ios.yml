@@ -31,6 +31,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm sync:staging
+        env:
+          CAP_STAGING_URL: ${{ vars.CAP_STAGING_URL }}
       - name: Simulator build (unsigned)
         working-directory: ios/App
         run: |
@@ -52,6 +54,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm sync:${{ vars.IOS_RELEASE_ENV || 'staging' }}
+        env:
+          CAP_STAGING_URL: ${{ vars.CAP_STAGING_URL }}
       - name: Build and upload to TestFlight
         run: fastlane ios beta
         env:

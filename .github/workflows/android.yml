@@ -36,7 +36,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       # PRs build against staging; the store build below re-syncs for prod.
+      # The branch URL is a repository variable, not committed: this repo is
+      # public and staging is not meant to be discoverable from it.
       - run: pnpm sync:staging
+        env:
+          CAP_STAGING_URL: ${{ vars.CAP_STAGING_URL }}
       - name: Debug build
         working-directory: android
         run: ./gradlew assembleDebug --console=plain
@@ -65,6 +69,8 @@ jobs:
           cache: gradle
       - run: pnpm install --frozen-lockfile
       - run: pnpm sync:${{ vars.ANDROID_RELEASE_ENV || 'staging' }}
+        env:
+          CAP_STAGING_URL: ${{ vars.CAP_STAGING_URL }}
       - name: Write the upload keystore
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
         env:

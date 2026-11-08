@@ -39,7 +39,6 @@
                 <data android:scheme="https" />
                 <data android:host="startlineau.com" />
                 <data android:host="organiser.startlineau.com" />
-                <data android:host="staging.startlineau.com" />
                 <data android:pathPrefix="/events/" />
                 <data android:pathPrefix="/activity" />
                 <data android:pathPrefix="/checkin/" />

@@ -9,8 +9,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * Which site the shell loads is fixed at `cap sync` time by CAP_ENV:
  *
  *   dev      the web app's dev server on this machine (cleartext, dev only)
- *   staging  https://staging.startlineau.com   (internal testing builds)
- *   prod     https://startlineau.com           (store builds)
+ *   staging  the Amplify branch domain, from CAP_STAGING_URL (internal testing)
+ *   prod     https://startlineau.com                     (store builds)
  *
  * Run `pnpm sync:<env>` after changing it; the value is copied into the
  * native projects, not read at runtime.
@@ -27,9 +27,40 @@ if (!["dev", "staging", "prod"].includes(env)) {
 // the same network needs the machine's LAN address: set CAP_DEV_URL.
 const DEV_URL = process.env.CAP_DEV_URL ?? "http://10.0.2.2:3000";
 
+// Staging is the Amplify branch domain for the `main` branch; there is no
+// staging subdomain. The host carries the Amplify app ID, and this repo is
+// public, so the URL is supplied at sync time instead of committed:
+//
+//   CAP_STAGING_URL=https://<branch>.<app-id>.amplifyapp.com pnpm sync:staging
+//
+// CI reads the CAP_STAGING_URL repository variable.
+const STAGING_URL = process.env.CAP_STAGING_URL ?? "";
+
+// allowNavigation needs the host, and a malformed value should fail here rather
+// than produce a staging build that opens every in-site link in the browser.
+function stagingHost(url: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error(`CAP_STAGING_URL must be a full URL, got "${url}".`);
+  }
+  if (parsed.protocol !== "https:") {
+    throw new Error(`CAP_STAGING_URL must be https, got "${url}".`);
+  }
+  return parsed.host;
+}
+
+const STAGING_HOST = STAGING_URL ? stagingHost(STAGING_URL) : "";
+if (env === "staging" && !STAGING_HOST) {
+  throw new Error(
+    "CAP_ENV=staging needs CAP_STAGING_URL, the Amplify branch URL for the main branch.",
+  );
+}
+
 const SITE: Record<AppEnv, string> = {
   dev: DEV_URL,
-  staging: "https://staging.startlineau.com",
+  staging: STAGING_URL,
   prod: "https://startlineau.com",
 };
 
@@ -39,7 +70,7 @@ const SITE: Record<AppEnv, string> = {
 // webview block.
 const ALLOW_NAVIGATION: Record<AppEnv, string[]> = {
   dev: ["10.0.2.2", "localhost", "*.startlineau.com"],
-  staging: ["staging.startlineau.com"],
+  staging: STAGING_HOST ? [STAGING_HOST] : [],
   prod: ["startlineau.com", "organiser.startlineau.com"],
 };
 
